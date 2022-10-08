@@ -21,5 +21,7 @@ Route::middleware('auth:sanctum')->get('/admin', [App\Http\Controllers\ArticleCo
 Route::middleware('auth:sanctum')->get('/admin/article/create', function () {
     return view('newArticle');
 })->name('add');
-Route::get('/article/{id}', [App\Http\Controllers\ArticleController::class, 'getById']);
+// Route::get('/article/{id}', [App\Http\Controllers\ArticleController::class, 'getById']);
+Route::get('/article/{slug}', [App\Http\Controllers\ArticleController::class, 'getByURL']);
+
 Route::middleware('auth:sanctum')->post('/postArticle',  [App\Http\Controllers\ArticleController::class, 'create']);

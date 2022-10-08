@@ -44,7 +44,7 @@
                     <div class="row">
                         <div class="col-sm-12">
                         {{$article['txt']}}
-                        <a href="/article/{{$article['id']}}">read more</a>
+                        <a href="/article/{{$article['slug']}}">read more</a>
                         </div>
                     </div>
                 </div>
