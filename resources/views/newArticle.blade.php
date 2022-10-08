@@ -28,7 +28,8 @@
   <strong>Error!</strong>
   Please insert article header and body
 </div>
-<div id="editorjs" style="max-width: 1000px; margin: 0 auto"></div>
+<div id="editorjs" style="max-width: 1000px; margin: 0 auto">
+</div>
 <div id='searchModal'></div>
 <div style="text-align:center">
 <button style="width:40%" type="button" class="btn btn-default" id="save-button">Save</button>
@@ -72,7 +73,7 @@
                   </div>
                   <hr/>
                   <div class="row" style="min-height: 20vh; max-height: 50vh; overflow-y: scroll;" id="giff-content${compId}">
-                    <div class="col-sm-2">
+                    <div class="col-sm-2" id="content${compId}">
                     </div>
                     <div class="col-sm-10">
                       <p>No results to show</p>
@@ -102,9 +103,12 @@
             $("#searchModal").html(html);
             $(`#${compId}`).css('display', 'block');
           }
-        }
+        },
       }
-    }
+    },
+    onChange: (api, event) => {
+     console.log('Now I know that Editor\'s content changed!', event)
+   }
   });
 
   /**
@@ -130,7 +134,7 @@
           function(data, status){
             $("#success-alert").fadeTo(2000, 500).slideUp(500, function(){
                 $("#success-alert").slideUp(500);
-                window.location.href = "/admin";
+                // window.location.href = "/admin";
             });
           });
 

@@ -88,7 +88,27 @@ class ArticleController extends Controller
         ]);
         $dt = new DateTime($data[0]->created_at);
         $data[0]->created_at=($dt->format('Y/m/d'));
-        $data[0]->txt=json_decode($data[0]->txt);
+        $decodedText=json_decode($data[0]->txt);
+        //data[0]->txt
+        $blocks=[];
+
+        foreach ($decodedText->blocks as $block) {
+            if($block->type=='gif')
+            {
+                foreach ($block->data as $d) {
+                    $tmp=clone($d);
+                $tmp ->id=$d->id;
+                $tmp ->type='gif';
+                $tmp ->data=$d;
+                array_push($blocks,$tmp);
+            }
+            }else{
+                array_push($blocks,$block);
+            }
+
+        }
+        $decodedText->blocks=$blocks;
+        $data[0]->txt=$decodedText;
         return view('single',['data'=>$data[0]]);
     }
 

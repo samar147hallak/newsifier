@@ -25,6 +25,7 @@ class SimpleImage {
   compId = Math.floor(Math.random() * 999999999) + 1;
   giffs = [];
   selectedImage = {};
+  selectedImages = [];
   page = 0;
   /**
    * Allow render Image Blocks by pasting HTML tags, files and URLs
@@ -91,24 +92,31 @@ class SimpleImage {
   render() {
     this.wrapper = document.createElement('div');
     this.wrapper.classList.add('simple-image');
+    this.wrapper.contentEditable = true;
+
     if (this.data && this.data.url) {
-      this._createImage(this.data.url, this.data.caption);
+      this._createImage(this.data.url, this.data.caption,this.data.id);
       return this.wrapper;
     }
 
     this.config.openModal(this.compId)
     $('#chooseBtn' + this.compId).click(this.chooseHandler);
     $('#searchBtn' + this.compId).click(this.searchHandler);
+    $('#searchBox' + this.compId).keydown(this.searchHandler);
     $('body').on('click', '.clickableimage', this.imageClick);
 
-
-
-
+    console.log(this.wrapper)
     return this.wrapper;
   }
+
   chooseHandler = () => {
-    this._createImage(this.selectedImage.images.original.url, this.selectedImage.title);
-    document.getElementById(this.compId).style.display = 'none'
+    if(this.selectedImages?.length){
+      for(const img of this.selectedImages){
+        this._createImage(img.images.original.url, img.title,img.id);
+        document.getElementById(this.compId).style.display = 'none';
+      }
+    }
+    
   }
 
   searchHandler = ($event) => {
@@ -119,6 +127,11 @@ class SimpleImage {
       
     if ($('#searchBox' + this.compId).val())
       $.get("http://localhost:3000/giffs/" + $('#searchBox' + this.compId).val() + '/' + this.page, this.ajaxHandler);
+  }
+
+  searchURLhHandler = ($event) => {
+      console.log($event,api);
+      // $.get("http://localhost:3000/giffs/" );
   }
 
   ajaxHandler = (data, status) => {
@@ -157,29 +170,41 @@ class SimpleImage {
   }
 
   imageClick = (event) => {
-    if (this.selectedImage && this.selectedImage.id)
-      $("#" + this.selectedImage.id).removeClass("selected");
-    this.selectedImage = this.giffs.find(a => a.id == event.currentTarget.id);
-    $("#" + event.currentTarget.id).addClass("selected");
 
+    if (this.selectedImages?.find(img=>img.id=== event.currentTarget.id)){
+      $("#" + this.selectedImage.id).removeClass("selected");
+      this.selectedImages =this.selectedImages?.filter(img=>img.id!==this.selectedImage?.id)
+    }else{
+      this.selectedImage = this.giffs.find(a => a.id == event.currentTarget.id);
+      $("#" + event.currentTarget.id).addClass("selected");
+      if(!this.selectedImages?.find(img=>img.id===this.selectedImage?.id) && this.selectedImage?.id){
+        this.selectedImages.push(this.selectedImage);
+      }
+    }
   }
+
   /**
    * @private
    * Create image with caption field
    * @param {string} url — image source
    * @param {string} captionText — caption value
    */
-  _createImage(url, captionText) {
+  _createImage(url, captionText,id) {
     const image = document.createElement('img');
+    image.setAttribute('id',id);
+
     const caption = document.createElement('div');
 
     image.src = url;
     caption.contentEditable = true;
     caption.innerHTML = captionText || '';
 
-    this.wrapper.innerHTML = '';
-    this.wrapper.appendChild(image);
-    this.wrapper.appendChild(caption);
+    const wrap =document.createElement('div');
+    wrap.classList.add('content-gif');
+
+    wrap.appendChild(image);
+    wrap.appendChild(caption);
+    this.wrapper.appendChild(wrap);
 
     this._acceptTuneView();
   }
@@ -190,13 +215,23 @@ class SimpleImage {
    * @return {SimpleImageData}
    */
   save(blockContent) {
-    const image = blockContent.querySelector('img');
-    const caption = blockContent.querySelector('[contenteditable]');
+    const data=[];
+      const images = blockContent.querySelectorAll('img');
+      const captions = blockContent.querySelectorAll('[contenteditable]');
+      images.forEach((im,i)=>{
+       const d= Object.assign(this.data, {
+          url: im.src,
+          caption: captions[i].innerHTML || '',
+          id:im.id,
+        });
+        let clone = {}; 
+        for (let key in d) {
+          clone[key] = d[key];
+        }
+       data.push(clone)
 
-    return Object.assign(this.data, {
-      url: image.src,
-      caption: caption.innerHTML || ''
-    });
+      })
+    return data;
   }
 
   /**
@@ -206,7 +241,7 @@ class SimpleImage {
    * @return {boolean}
    */
   validate(savedData) {
-    if (!savedData.url.trim()) {
+    if (!savedData?.length>0) {
       return false;
     }
 
