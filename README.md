@@ -24,3 +24,10 @@ These are the commands you should execute one by one to run the project:
 - npm run dev
 
 ### Then make sure that the node project is running and open you browser and go to http://localhost:8000/ 
+
+### Notes about the project
+- This Repo represents a polished MVP of a news CMS where clients can create articles with GIF images.
+- The system has an authentication system. The user is log in, log out and sign up (Laravel) (ps: this is a basic system so admin panel is not implemented at this stage, article creation is done from a specific screen for registered user)
+- The search GIF’s API is implemented with NodeJS, the API provider can be easily changed in only one place (settings file)
+- to enhance the performance of the search plugin lazy loadiing is implemented, only 20 GIFs are fetched at a time;
+- Eloquent Sluggable is used to ensure the uniqueness of the slugs among the articles.
